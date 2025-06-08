@@ -187,12 +187,23 @@ app.get("/top-artists-graph", (req, res) => {
         .forEach((link) => filteredLinks.push(link));
     });
 
-    const nodes = filteredArtists.map((artist) => ({
-      id: artist.id,
-      name: artist.name,
-      val: artist.popularity,
-      img: artist.img,
-    }));
+        // Get set of connected artist IDs
+    const connectedIds = new Set();
+    filteredLinks.forEach(link => {
+      connectedIds.add(link.source);
+      connectedIds.add(link.target);
+    });
+
+    // Only include nodes that are connected
+    const nodes = filteredArtists
+      .filter((artist) => connectedIds.has(artist.id))
+      .map((artist) => ({
+        id: artist.id,
+        name: artist.name,
+        val: artist.popularity,
+        img: artist.img,
+      }));
+
 
     res.json({ nodes, links: filteredLinks });
   });
